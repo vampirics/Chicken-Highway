@@ -57,6 +57,19 @@ const Chicken1box = file("Chicken1box", 0);
 const Chicken2box = file("Chicken2box", 0);
 
 
+function reset()
+{
+
+start = time();
+
+playerY1 = 150;
+score1 = 0;
+
+playerY2 = 150;
+score2 = 0;
+
+}
+
 function waitForInput()
 {
     // Player One Input
@@ -202,7 +215,9 @@ function gameOver()
         color(0);
     }
     if (timeSinceStart >=60) timeSinceStart = 60;
-    if (pressed("A")) exit();
+    if (pressed("C")) exit();
+    if (justPressed("B")) reset();
+        return;
 }
 
 
