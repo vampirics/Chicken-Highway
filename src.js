@@ -44,8 +44,13 @@ for( var carid = 0; carid < nCars; carid++ )
 var start = time()
 
 const StreetBG = file("StreetBG", 0); 
-const redCar = file("FreewayCar2", 0); 
-const greenCar = file("FreewayCar1", 0); 
+
+const carImages =
+    [
+    file("FreewayCar2", 0), // Red car
+    file("FreewayCar1", 0), // Green car
+    file("FreewayCar3", 0)  // Truck
+    ];
 
 const playerOne = file("FreewayChicken_F1", 0);
 const playerOneF2 = file("FreewayChicken_F2", 0);
@@ -134,16 +139,16 @@ function updateCars(){
 		tCars[i] += tCars[i+2]; //move target cars x coordinate by the cars speed 
 		//check to see if car i has left the edge of the screen and needs to be reset
 		if(tCars[i+2]>0){//car is moving to the right
-			if(tCars[i]>252){//car i x coordinate is greater than right edge of screen
-				tCars[i] = 0;//set car x coordinate back to 0
+			if(tCars[i]>220){//car i x coordinate is greater than right edge of screen
+				tCars[i] = -64;//set car x coordinate back to 0
 				tCars[i+2] = random(1,5);// set car speed to a random number between 1 and 4
-				tCars[i+3] = random(1,3);// set car type to a random number between 1 and 2
+				tCars[i+3] = random(1,4);// set car type to a random number between 1 and 3
 			}
 		}else{//car must be moving left
 			if(tCars[i]<-64){
-				tCars[i] = 252;//set car x coordinate back to 252
+				tCars[i] = 220;//set car x coordinate back to 252
 				tCars[i+2] = random(1,5)-6;// set car speed to a random number between 1 and 4 then subtract 6 to get a negative number
-				tCars[i+3] = random(1,3);// set car type to a random number between 1 and 2
+				tCars[i+3] = random(1,4);// set car type to a random number between 1 and 2
 			}
 		}
 	}
@@ -152,9 +157,8 @@ function updateCars(){
 
 function carRender()
 {
-	for (var i = 0; i < nCars; i++)
+	for( var carid = 0; carid < nCars; carid++ )
 	{
-	for( var carid = 0; carid < nCars; carid++ ) {
 		var i = carid * vCars;//determine the starting index in array for target car
 		if(tCars[i+2]>0){//car is moving to the right
 			mirror( false );
@@ -162,12 +166,8 @@ function carRender()
 			mirror( true );
 		}
         io("COLLISION", CAR_IDX, 0); // CHANGED
-		if(tCars[i+3]==1){//is target car type = 1 then it is a red car
-			sprite(tCars[i] - 32, tCars[i+1], redCar);	//draw red car at x and y coordinate 
-		}else{//car must be green
-			sprite(tCars[i] - 32, tCars[i+1], greenCar);	//draw green car at x and y coordinate 
-		}
-	}
+	    var carType = tCars[i+3] - 1;
+        sprite(tCars[i], tCars[i+1], carImages[carType]);
 	}
 }
 
@@ -206,14 +206,26 @@ function gameOver()
     {
         color(7); cursor(55,75);
         print("PLAYER 1 WINS!")
+        cursor(15,95);
+        print("B TO RESTART / C TO EXIT")
         color(0);
     }
-    else
-    {
-        color(7); cursor(55,75);
-        print("PLAYER 2 WINS!")
-        color(0);
-    }
+        if (score1 == score2)
+        {
+            color(7); cursor(45,75);
+            print("IT'S A TIED GAME!")
+            cursor(15,95);
+            print("B TO RESTART / C TO EXIT")
+            color(0);
+        }
+            if (score1 < score2)
+            {
+                color(7); cursor(55,75);
+                print("PLAYER 2 WINS!")
+                cursor(15,95);
+                print("B TO RESTART / C TO EXIT")
+                color(0);
+            }
     if (timeSinceStart >=60) timeSinceStart = 60;
     if (pressed("C")) exit();
     if (justPressed("B")) reset();
