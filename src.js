@@ -17,28 +17,46 @@ const PLAYER1_IDX = 1;
 const PLAYER2_IDX = 2;
 
 const vCars = 4;//each car has 4 varialbes
-const cCars = 6 * 4;// we have 6 cars and each car has 4 variables each
-const nCars = 6;
+const nCars = 12;
+const cCars = vCars * nCars;// we have 12 cars and each car has 4 variables each (x, y, speed, type, show)
 var tCars = Array( cCars );
+//var carLength = [32, 32, 64];
 
 //initialize cars
-for( var carid = 0; carid < nCars; carid++ )
-{
+
+for(var carid = 0; carid < nCars; carid++) {
+    
 	var i = carid * vCars; //determine the starting index in array for target car
-	if(carid<3)
-	{   //if this is car 0,1 or 2 then it is on the top half of the screen
-		tCars[i] = 0;//set Car (cardid) X coordinate
-		tCars[i+1] = 22+(carid*21);//set Car (cardid) Y coordinate - 22,43,64
-		tCars[i+2] = random(1,5)-6;//set Car (cardid) XSPEED
+	var lane = carid / 2;
+	var speed = random(2, 5);
+	var offset = 0;
+
+	if (carid % 2 == 1) { 
+	    offset = 150; 
+	    
+	}
+	else {
+	    offset = 0;
+	}
+
+	if (carid < 6) {
+
+        tCars[i] = 0 - offset;
+		tCars[i+1] = 22 +(lane * 21);//set Car (cardid) Y coordinate - 22,43,64
+		tCars[i+2] = -speed;//set Car (cardid) XSPEED
+		
     }
-        else
-        {
-		    tCars[i] = 220;//set Car (cardid) X coordinate
-		    tCars[i+1] = 92+((carid-3)*21);//set Car (cardid) Y coordinate - 92,113,134
-		    tCars[i+2] = random(1,5);//set Car (cardid) XSPEED
-	    }
-	tCars[i+3] = random(1,3);//set Car (cardid) type
+    else {   
+        
+	    tCars[i] = 220 + offset;
+	    tCars[i+1] = 92 + ((lane-3) * 21);//set Car (cardid) Y coordinate - 92,113,134
+	    tCars[i+2] = speed;//set Car (cardid) XSPEED
+    }
+// console( tCars[i]);
+	tCars[i+3] = random(1, 3); //show
+
 }
+
 
 
 var start = time()
@@ -62,30 +80,29 @@ const Chicken1box = file("Chicken1box", 0);
 const Chicken2box = file("Chicken2box", 0);
 
 
-function reset()
-{
+function reset() {
 
-start = time();
-
-playerY1 = 150;
-score1 = 0;
-
-playerY2 = 150;
-score2 = 0;
+    start = time();
+    
+    playerY1 = 150;
+    score1 = 0;
+    
+    playerY2 = 150;
+    score2 = 0;
 
 }
 
 function waitForInput()
 {
     // Player One Input
-    if ((pressed("UP")) && (playerY1 > 0))           playerY1-=2;
-    if ((pressed("DOWN")) && (playerY1 < 150))        playerY1+=2;
+    if ((pressed("UP")) && (playerY1 > 0))          playerY1-=2;
+    if ((pressed("DOWN")) && (playerY1 < 150))      playerY1+=2;
     
     // Player Two Input
     if ((pressed("A")) && (playerY2 > 0))           playerY2-=2;
-    if ((pressed("B")) && (playerY2 < 150))        playerY2+=2;
+    if ((pressed("B")) && (playerY2 < 150))         playerY2+=2;
 
-    if (pressed("C"))                                exit();
+    if (pressed("C"))                               exit();
     
 }
 
@@ -116,13 +133,15 @@ function playerRender()
 {
     io("COLLISION", PLAYER1_IDX, CAR_IDX, collide);
     sprite(50, playerY1 + 6, Chicken1box);
-        Chicken1Anim++;
-        if((Chicken1Anim/3)%2==0)
+    Chicken1Anim++;
+
+    if((Chicken1Anim/3)%2==0) {
         sprite(50, playerY1, playerOne);
-    else
+    }
+    else {
         sprite(50, playerY1, playerOneF2);
-        //sprite(50, playerY1, playerOne);
-    
+    }
+
     io("COLLISION", PLAYER2_IDX, CAR_IDX, collide);
     sprite(150, playerY2 + 6, Chicken2box);
         //Chicken1Anim++;
@@ -133,120 +152,182 @@ function playerRender()
         //sprite(150, playerY2, playerTwo);
 }
 
+
 function updateCars(){
+    
 	for( var carid = 0; carid < nCars; carid++ ) {
+	    
 		var i = carid * vCars;//determine the starting index in array for target car
-		tCars[i] += tCars[i+2]; //move target cars x coordinate by the cars speed 
-		//check to see if car i has left the edge of the screen and needs to be reset
-		if(tCars[i+2]>0){//car is moving to the right
-			if(tCars[i]>220){//car i x coordinate is greater than right edge of screen
-				tCars[i] = -64;//set car x coordinate back to 0
-				tCars[i+2] = random(1,5);// set car speed to a random number between 1 and 4
-				tCars[i+3] = random(1,4);// set car type to a random number between 1 and 3
-			}
-		}else{//car must be moving left
-			if(tCars[i]<-64){
-				tCars[i] = 220;//set car x coordinate back to 252
-				tCars[i+2] = random(1,5)-6;// set car speed to a random number between 1 and 4 then subtract 6 to get a negative number
-				tCars[i+3] = random(1,4);// set car type to a random number between 1 and 2
-			}
+		var offset = -4;
+
+		if (carid % 2 == 0) {
+		    offset = 4;
 		}
+		else {
+		    offset = -4;
+		}
+		
+		
+		var otherCarX = tCars[i + offset];
+		var x = tCars[i] + tCars[i+2];
+
+		if (tCars[i+2] > 0) {//car is moving to the right
+
+            if (x + 80 < otherCarX || otherCarX < x) {
+        
+        		tCars[i] = x; //move target cars x coordinate by the cars speed 
+        		
+        	}
+        	else {
+       
+        		tCars[i] = otherCarX - 80;
+        	    
+        	}
+        
+        
+            launchCar_Right(i, offset);
+            
+		} 
+		
+		if (tCars[i+2] < 0) { //car must be moving left
+
+        	if (x - 80 > otherCarX || otherCarX > x) {
+        
+        		tCars[i] = x; //move target cars x coordinate by the cars speed 
+        		
+        	}
+        	else {
+        
+        		tCars[i] = otherCarX + 80;
+        	    
+        	}
+        
+            launchCar_Left(i, offset);
+            
+		}
+    	
 	}
+	
 }
 
+function launchCar_Right(i, offset) {
+    
+	if(tCars[i] > 220) {//car i x coordinate is greater than right edge of screen
+	
+		tCars[i] = tCars[i + offset] - 250;
+		tCars[i+2] = random(2, 5);// set car speed to a random number between 2 and 4
+		tCars[i+3] = random(1, 4);// set car type to a random number between 1 and 3
 
-function carRender()
-{
-	for( var carid = 0; carid < nCars; carid++ )
-	{
+	}
+	
+}
+
+function launchCar_Left(i, offset) {
+    
+    if(tCars[i] < -64){
+        
+        tCars[i] = tCars[i + offset] + 250;
+        tCars[i+2] = -random(2, 5);// set car speed to a random number between 2 and 4 negative
+        tCars[i+3] = random(1, 4);// set car type to a random number between 1 and 3
+        
+    }
+    
+}
+
+function carRender() {
+    
+	for( var carid = 0; carid < nCars; carid++) {
+
 		var i = carid * vCars;//determine the starting index in array for target car
+		
 		if(tCars[i+2]>0){//car is moving to the right
 			mirror( false );
-		}else{//car must be moving left
+		}
+		else {
 			mirror( true );
 		}
+		
         io("COLLISION", CAR_IDX, 0); // CHANGED
 	    var carType = tCars[i+3] - 1;
         sprite(tCars[i], tCars[i+1], carImages[carType]);
+
 	}
+	
 }
 
-function checkForPoint()
-{
-    if (playerY1 <= 0)
-    {
+function checkForPoint() {
+    
+    if (playerY1 <= 0) {
         score1 +=1;
         playerY1 = 150;
         playSound();
     }
     
-    if (playerY2 <= 0)
-    {
+    if (playerY2 <= 0) {
         score2 +=1;
         playerY2 = 150;
         playSound();
     }
+    
 }
 
 
-function playSound()
-{
+function playSound() {
     io("VOLUME", 127);
     io("DURATION", 70);
     sound(random(44, 47));
 }
 
-function gameOver()
-{
+function gameOver() {
+    
     highscore(max(score1, score2))
     background();
     updateCars();
     carRender();
-    if (score1 > score2)
-    {
-        color(7); cursor(55,75);
+    color(7); 
+    
+    if (score1 > score2) {
+        cursor(55,75);
         print("PLAYER 1 WINS!")
-        cursor(15,95);
-        print("B TO RESTART / C TO EXIT")
-        color(0);
+
     }
-        if (score1 == score2)
-        {
-            color(7); cursor(45,75);
-            print("IT'S A TIED GAME!")
-            cursor(15,95);
-            print("B TO RESTART / C TO EXIT")
-            color(0);
-        }
-            if (score1 < score2)
-            {
-                color(7); cursor(55,75);
-                print("PLAYER 2 WINS!")
-                cursor(15,95);
-                print("B TO RESTART / C TO EXIT")
-                color(0);
-            }
+    else if (score1 == score2) {
+        cursor(45,75);
+        print("IT'S A TIED GAME!")
+    }
+    else {
+        cursor(55,75);
+        print("PLAYER 2 WINS!")
+    }
+
+    cursor(15,95);
+    print("B TO RESTART / C TO EXIT")
+    color(0);
+    
     if (timeSinceStart >=60) timeSinceStart = 60;
     if (pressed("C")) exit();
     if (justPressed("B")) reset();
-        return;
+
 }
 
 
-function update()
-{
+function update() {
+    
     var timeSinceStart = (time() - start) / 1000; 
+    
     if(timeSinceStart >= 60) {
         gameOver();
-    } else {
+    } 
+    else {
         checkForPoint();
         waitForInput();
         background();
-        color(175); cursor(105,5); print(60 - timeSinceStart); color(0);
         updateCars();
         carRender();
         playerRender();
+        color(175); cursor(105,5); print(60 - timeSinceStart); //color(0);
     }
+    
     scoreDisplay();
 
 } 
